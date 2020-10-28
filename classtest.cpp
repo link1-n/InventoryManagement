@@ -51,6 +51,34 @@ int inventory::getQty() const
     return this->qty;
 }
 
+void fileIn(vector <inventory> &a)
+{
+    fin.open("inv.txt");
+
+    for (inventory temp;
+            fin >> temp.ID
+                >> temp.qty; )
+    {
+        a.push_back(temp);
+    }
+
+    /*above code thanks to https://ideone.com/hMgoP from https://stackoverflow.com/questions/9979894/using-vector-of-user-defined-class-type-objects*/
+
+    /*
+    while(!fin.eof())
+    {
+        inventory fileInput;
+
+        fin>>fileInput.ID;
+        fin>>fileInput.qty;
+
+        a.push_back(fileInput);
+    }
+    */
+
+    fin.close();
+}
+
 void fileOut(vector <inventory> a)
 {
     int size = a.size();
@@ -107,39 +135,67 @@ int anotherSearch(vector<inventory> a, string query)
         if ((*it).getID() == query)
         {
             index = distance(a.begin(), it);
+
+            return index;
             break;
         }
     }
 
-    return index;
+    /*---ERROR HANDLING---*/
+    // Returns the value of the index at which the searched element resides only if
+    // the element exists, if the element does not exist, the program is aborted.
+    /* Could find better solution */
+
+    try
+    {
+        if (index >= a.size() || index < 0)
+        {
+            throw std::invalid_argument("The element doesn't exist. Please try again. Aborting Program.");
+        }
+    }
+    catch (const std::invalid_argument &e)
+    {
+        cerr<<e.what()<<endl;
+        exit(0);
+    }
+    
+    return -1;
 }
 
-void fileIn(vector <inventory> &a)
+/*  Need to find which search is faster  */
+
+void newItem(vector<inventory> &a)
 {
-    fin.open("inv.txt");
+    string newID;
 
-    for (inventory temp;
-            fin >> temp.ID
-                >> temp.qty; )
-    {
-        a.push_back(temp);
-    }
+    cout<<"Enter the ID of the new item:";
+    cin>>newID;
 
-    /*above code thanks to https://ideone.com/hMgoP from https://stackoverflow.com/questions/9979894/using-vector-of-user-defined-class-type-objects*/
+    /* ------NOT COMPLETED------ */
 
-    /*
-    while(!fin.eof())
-    {
-        inventory fileInput;
+}
 
-        fin>>fileInput.ID;
-        fin>>fileInput.qty;
+void edit(vector<inventory> &a)
+{
+    string queryinp;
+    
+    cout<<"search for element:"<<endl;
+    cin>>queryinp;
 
-        a.push_back(fileInput);
-    }
-    */
+    auto index = anotherSearch(a, queryinp);
 
-    fin.close();
+    cout<<"the element is:"<<endl;
+    a[index].output();
+    cout<<"Enter new values:"<<endl;
+    int newQty;
+    string newID;
+    cout<<"New Quantity:"<<endl;
+    cin>>newQty;
+    cout<<"New ID:"<<endl;
+    cin>>newID;
+
+    a[index].ID = newID;
+    a[index].qty = newQty;
 }
 
 int main()
@@ -153,19 +209,19 @@ int main()
 
     int size = main.size();
 
-    cout<<size<<endl;
+    //cout<<size<<endl;
 
     for (int i = 0; i<size; i++)
     {
         main[i].output();
     }
 
-    int in;
-    in = anotherSearch(main, "AAAAA");
-    //main[in].output();
+    //edit(main);
 
+    
+    int in;
+    in = anotherSearch(main, "AAAAB");
     cout<<in<<endl<<endl<<endl;
-    main[in].output();
 
     fileOut(main);
 
