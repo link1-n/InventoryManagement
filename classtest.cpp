@@ -156,7 +156,7 @@ int anotherSearch(vector<inventory> a, string query)
     catch (const std::invalid_argument &e)
     {
         cerr<<e.what()<<endl;
-        exit(0);
+        //exit(0);
     }
     
     return -1;
@@ -167,9 +167,27 @@ int anotherSearch(vector<inventory> a, string query)
 void newItem(vector<inventory> &a)
 {
     string newID;
+    int newQty;
 
-    cout<<"Enter the ID of the new item:";
+    cout<<"Enter the ID of the new item:"<<endl;
     cin>>newID;
+    cout<<"Enter the Quantity of the new Item:"<<endl;
+    cin>>newQty;
+
+    int in;
+    in = anotherSearch(a, newID);
+
+    if(in == -1)
+    {
+        inventory temp(newID, newQty);
+        a.push_back(temp);
+    }
+    else
+    {
+        cout<<"An item with the same ID already exists. Appending the quantity to it."<<endl;
+        a[in].qty = a[in].qty + newQty;
+    }
+    
 
     /* ------NOT COMPLETED------ */
 
@@ -207,11 +225,11 @@ int main()
     //inventory h("LOLOL", 3);
     //main.push_back(h);
 
-    int size = main.size();
+    // int size = main.size();
 
     //cout<<size<<endl;
 
-    for (int i = 0; i<size; i++)
+    for (int i = 0; i<main.size(); i++)
     {
         main[i].output();
     }
@@ -219,9 +237,16 @@ int main()
     //edit(main);
 
     
-    int in;
-    in = anotherSearch(main, "AAAAB");
-    cout<<in<<endl<<endl<<endl;
+    // int in;
+    // in = anotherSearch(main, "AAAAB");
+    // cout<<in<<endl<<endl<<endl;
+
+    newItem(main);
+
+    for (int i = 0; i<main.size(); i++)
+    {
+        main[i].output();
+    }
 
     fileOut(main);
 
