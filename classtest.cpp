@@ -144,6 +144,7 @@ int anotherSearch(vector<inventory> a, string query)
     /*---ERROR HANDLING---*/
     // Returns the value of the index at which the searched element resides only if
     // the element exists, if the element does not exist, the program is aborted.
+    
     /* Could find better solution */
 
     try
@@ -156,7 +157,6 @@ int anotherSearch(vector<inventory> a, string query)
     catch (const std::invalid_argument &e)
     {
         cerr<<e.what()<<endl;
-        //exit(0);
     }
     
     return -1;
@@ -184,8 +184,20 @@ void newItem(vector<inventory> &a)
     }
     else
     {
-        cout<<"An item with the same ID already exists. Appending the quantity to it."<<endl;
-        a[in].qty = a[in].qty + newQty;
+        cout<<"An item with the same ID already exists. Please choose from one the following options:"<<endl
+            <<"1. Append the quantity of the new Items to the quantity of the existing Item."<<endl
+            <<"2. Try Again"<<endl;
+        int opt;
+        cin>>opt;
+
+        if (opt == 1)
+        {
+            a[in].qty = a[in].qty + newQty;
+        }
+        else
+        {
+            newItem(a);
+        }
     }
     
 
@@ -193,7 +205,7 @@ void newItem(vector<inventory> &a)
 
 }
 
-void edit(vector<inventory> &a)
+void editItem(vector<inventory> &a)
 {
     string queryinp;
     
@@ -216,6 +228,67 @@ void edit(vector<inventory> &a)
     a[index].qty = newQty;
 }
 
+void mainMenu(vector<inventory> &a)
+{
+    bool runAgain = true;
+    
+    do
+    {
+        cout<<"Welcome."<<endl
+        <<"1. View"<<endl
+        <<"2. New"<<endl
+        <<"3. Edit"<<endl
+        <<"4. Search"<<endl;
+
+        int menu_opt;
+        
+        cin>>menu_opt;
+
+
+        if(menu_opt == 1)
+        {
+            for(int i = 0; i<a.size(); i++)
+            {
+                a[i].output();
+            }
+        }
+        else if(menu_opt == 2)
+        {
+            newItem(a);
+        }
+        else if(menu_opt == 3)
+        {
+            editItem(a);
+        }
+        else if(menu_opt == 4)
+        {
+            string inputQuery;
+            int searchIndex;
+
+            cout<<"Enter search query: "<<endl;
+            cin>>inputQuery;
+            
+            searchIndex = anotherSearch(a, inputQuery);
+            a[searchIndex].output();
+        }
+        else
+        {
+            cout<<"Wrong input."<<endl;
+        }
+        
+
+        char cont;
+        
+        cout<<"Do you want to run again? ('Y' or 'N')"<<endl;
+        cin>>cont;
+
+        if(cont == 'N' || cont == 'n')
+        {
+            runAgain = false;
+        }
+    } while (runAgain == true);
+}
+
 int main()
 {
     vector <inventory> main;
@@ -229,24 +302,26 @@ int main()
 
     //cout<<size<<endl;
 
-    for (int i = 0; i<main.size(); i++)
-    {
-        main[i].output();
-    }
+    // for (int i = 0; i<main.size(); i++)
+    // {
+    //     main[i].output();
+    // }
 
-    //edit(main);
+    //editItem(main);
 
     
     // int in;
     // in = anotherSearch(main, "AAAAB");
     // cout<<in<<endl<<endl<<endl;
 
-    newItem(main);
+    // newItem(main);
 
-    for (int i = 0; i<main.size(); i++)
-    {
-        main[i].output();
-    }
+    // for (int i = 0; i<main.size(); i++)
+    // {
+    //     main[i].output();
+    // }
+
+    mainMenu(main);
 
     fileOut(main);
 
