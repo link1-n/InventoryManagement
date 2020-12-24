@@ -231,14 +231,16 @@ void editItem(vector<inventory> &a)
 void mainMenu(vector<inventory> &a)
 {
     bool runAgain = true;
+
+    cout<<"Welcome."<<endl;
     
     do
     {
-        cout<<"Welcome."<<endl
-        <<"1. View"<<endl
-        <<"2. New"<<endl
-        <<"3. Edit"<<endl
-        <<"4. Search"<<endl;
+        cout<<"Please select an option from the following:"<<endl
+            <<"1. View"<<endl
+            <<"2. New"<<endl
+            <<"3. Edit"<<endl
+            <<"4. Search"<<endl;
 
         int menu_opt;
         
@@ -285,6 +287,16 @@ void mainMenu(vector<inventory> &a)
         if(cont == 'N' || cont == 'n')
         {
             runAgain = false;
+            
+            /*---- Asking user to save changes ----*/
+
+            char save;
+
+            cout<<"Do you want to save existing changes? (Y/N)"<<endl;
+            cin>>save;
+
+            if(save == 'Y' || save == 'y')
+                fileOut(a);
         }
     } while (runAgain == true);
 }
@@ -323,7 +335,7 @@ int main()
 
     mainMenu(main);
 
-    fileOut(main);
+    //fileOut(main);
 
     return 0;
     
