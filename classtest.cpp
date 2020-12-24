@@ -8,6 +8,8 @@ using namespace std;
 ofstream fout;
 ifstream fin;
 
+bool changes_to_save = false;
+
 class inventory
 {
     public:
@@ -106,12 +108,17 @@ void fileOut(vector <inventory> a)
     }
 }
 
-int search(vector <inventory> a, string query)
+void search(vector <inventory> a)
 {
+    string query;
+
+    cout<<"Enter search query: "<<endl;
+    cin>>query;
+    
     auto it = find_if(a.begin(), a.end(),                                               //range
                     [&query](const inventory& obj) {return obj.getID() == query;});     //condition to find
 
-    int index;
+    int index = -1;
 
     if (it != a.end())
     {
@@ -120,89 +127,116 @@ int search(vector <inventory> a, string query)
         index = distance(a.begin(), it);
     }
 
-    return index;
-
     //from https://stackoverflow.com/questions/15517991/search-a-vector-of-objects-by-object-attribute
+
+    if (index == -1)
+        cout<<"The element with the given ID does not exist."<<endl;
+    else
+        a[index].output();
 }
 
-int anotherSearch(vector<inventory> a, string query)
+int anotherSearch(vector<inventory> a, string query, bool check_if_exists)
 {
-    vector<inventory>::iterator it;
-    int index;
+    bool flagLoop = false;
+    bool flagInput = false;
+    int index = -1;
 
-    for (it = a.begin(); it<a.end(); it++)
+    do
     {
-        if ((*it).getID() == query)
+        string newQuery;
+        newQuery = query;
+        
+        if(flagInput == true)
         {
-            index = distance(a.begin(), it);
-
-            return index;
-            break;
+            cout<<"Enter ID: "<<endl;
+            cin>>newQuery;
         }
-    }
-
-    /*---ERROR HANDLING---*/
-    // Returns the value of the index at which the searched element resides only if
-    // the element exists, if the element does not exist, the program is aborted.
-    
-    /* Could find better solution */
-
-    try
-    {
-        if (index >= a.size() || index < 0)
+        
+        
+        /*---ERROR HANDLING---*/
+        // Returns the value of the index at which the searched element resides only if
+        // the element exists, if the element does not exist, the program is aborted.
+ 
+        try
         {
-            throw std::invalid_argument("The element doesn't exist. Please try again. Aborting Program.");
+            vector<inventory>::iterator it;
+
+            for (it = a.begin(); it<a.end(); it++)
+            {
+                if ((*it).getID() == newQuery)
+                {
+                    index = distance(a.begin(), it);
+
+                    flagLoop = true;
+                    break;
+                }
+            }
+
+            if (index == -1)
+                {
+                    if(check_if_exists == false)
+                        flagLoop = true;
+                    else
+                    {
+                        flagInput = true;
+                        throw std::invalid_argument("The element doesn't exist. Please try again.");
+                    }     
+                }
         }
-    }
-    catch (const std::invalid_argument &e)
-    {
-        cerr<<e.what()<<endl;
-    }
-    
-    return -1;
+
+        catch (const std::invalid_argument &e)
+        {
+            cerr<<e.what()<<endl;
+        }
+    } while(flagLoop == false);
+     
+    return index;
 }
-
-/*  Need to find which search is faster  */
 
 void newItem(vector<inventory> &a)
 {
     string newID;
     int newQty;
+    bool flag = false;
 
-    cout<<"Enter the ID of the new item:"<<endl;
-    cin>>newID;
-    cout<<"Enter the Quantity of the new Item:"<<endl;
-    cin>>newQty;
-
-    int in;
-    in = anotherSearch(a, newID);
-
-    if(in == -1)
+    do
     {
-        inventory temp(newID, newQty);
-        a.push_back(temp);
-    }
-    else
-    {
-        cout<<"An item with the same ID already exists. Please choose from one the following options:"<<endl
-            <<"1. Append the quantity of the new Items to the quantity of the existing Item."<<endl
-            <<"2. Try Again"<<endl;
-        int opt;
-        cin>>opt;
+        cout<<"Enter the ID of the new item:"<<endl;
+        cin>>newID;
+        cout<<"Enter the Quantity of the new Item:"<<endl;
+        cin>>newQty;
 
-        if (opt == 1)
+        int in;
+        in = anotherSearch(a, newID, false);
+
+        if(in >= 0 && in <= a.size())
         {
-            a[in].qty = a[in].qty + newQty;
+            cout<<"An item with the same ID already exists. Please choose from one the following options:"<<endl
+                <<"1. Append the quantity of the new Items to the quantity of the existing Item."<<endl
+                <<"2. Try Again"<<endl;
+            int opt;
+            cin>>opt;
+
+            if (opt == 1)
+            {
+                a[in].qty = a[in].qty + newQty;
+                flag = true;
+            }
+            else
+            {
+                continue;
+            }
         }
         else
         {
-            newItem(a);
+            inventory temp(newID, newQty);
+            a.push_back(temp);
+
+            flag = true;
         }
-    }
-    
+    } while (flag == false); 
 
-    /* ------NOT COMPLETED------ */
-
+    changes_to_save = true;
 }
 
 void editItem(vector<inventory> &a)
@@ -212,7 +246,7 @@ void editItem(vector<inventory> &a)
     cout<<"search for element:"<<endl;
     cin>>queryinp;
 
-    auto index = anotherSearch(a, queryinp);
+    auto index = anotherSearch(a, queryinp, true);
 
     cout<<"the element is:"<<endl;
     a[index].output();
@@ -226,6 +260,19 @@ void editItem(vector<inventory> &a)
 
     a[index].ID = newID;
     a[index].qty = newQty;
+
+    changes_to_save = true;
+}
+
+void saveData(vector<inventory> &a)
+{
+    char save;
+
+    cout<<"Do you want to save existing changes? (Y/N)"<<endl;
+    cin>>save;
+
+    if(save == 'Y' || save == 'y')
+        fileOut(a);
 }
 
 void mainMenu(vector<inventory> &a)
@@ -255,28 +302,13 @@ void mainMenu(vector<inventory> &a)
             }
         }
         else if(menu_opt == 2)
-        {
             newItem(a);
-        }
         else if(menu_opt == 3)
-        {
             editItem(a);
-        }
-        else if(menu_opt == 4)
-        {
-            string inputQuery;
-            int searchIndex;
-
-            cout<<"Enter search query: "<<endl;
-            cin>>inputQuery;
-            
-            searchIndex = anotherSearch(a, inputQuery);
-            a[searchIndex].output();
-        }
+        else if(menu_opt == 4)        
+            search(a);
         else
-        {
             cout<<"Wrong input."<<endl;
-        }
         
 
         char cont;
@@ -288,15 +320,9 @@ void mainMenu(vector<inventory> &a)
         {
             runAgain = false;
             
-            /*---- Asking user to save changes ----*/
-
-            char save;
-
-            cout<<"Do you want to save existing changes? (Y/N)"<<endl;
-            cin>>save;
-
-            if(save == 'Y' || save == 'y')
-                fileOut(a);
+            //Asking user to save changes
+            if(changes_to_save == true)
+                saveData(a);
         }
     } while (runAgain == true);
 }
